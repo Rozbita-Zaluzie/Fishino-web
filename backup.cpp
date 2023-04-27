@@ -1,12 +1,22 @@
-
+/////////////////////////////////////////////////////////////////
+// Repeating Wifi Web Client                                   //
+//                                                             //
+// This sketch connects to a a web server and makes a request  //
+// using an Arduino Wifi shield.                               //
+//                                                             //
+// Circuit:                                                    //
+//   None                                                      //
+//                                                             //
+// created 23 April 2012                                       //
+// modified 31 May 2012 by Tom Igoe                            //
+// modified 13 Jan 2014 by Federico Vanzati                    //
+// http://arduino.cc/en/Tutorial/WifiWebClientRepeating        //
+// This code is in the public domain.                          //
+//                                                             //
+// adapted to Fishino 16 Ago 2015 by Massimo Del Fedele        //
+/////////////////////////////////////////////////////////////////
 #include <Fishino.h>
 #include <SPI.h>
-
-
-#include <sstream>
-
-
-using namespace std;
 
 //////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -28,7 +38,8 @@ using namespace std;
 // inserire qui l'IP desiderato ed eventualmente gateway e netmask per il fishino
 // commentare le linee sotto se si vuole l'IP automatico
 // nota : se si utilizza l'IP automatico, occorre un metodo per trovarlo !
-
+//#define IPADDR	192, 168,   1, 251
+//#define GATEWAY	192, 168,   1, 1
 #define NETMASK	255, 255, 255, 0
 
 #endif
@@ -58,7 +69,6 @@ FishinoClient client;
 
 // server address:
 char server[] = "hockeyapi.herokuapp.com";
-String reaction;
 
 // last time you connected to the server, in milliseconds
 // l'ultima volta che vi siete connessi al server, in millisecondi
@@ -88,9 +98,9 @@ void httpRequest()
 		client << F("GET / HTTP/1.1\r\n");
 		client << F("Host: hockeyapi.herokuapp.com\r\n");
 		client << F("User-Agent: FishinoWiFi/1.1\r\n");
+    client << F("X-Auth: 123456789\r\n");
 		client << F("Connection: close\r\n");
-    client.println();
-    
+		client.println();
 	}
 	else
 	{
@@ -126,8 +136,6 @@ void printWifiStatus()
 }
 
 
-
-
 void setup()
 {
 	// Initialize serial and wait for port to open
@@ -136,6 +144,8 @@ void setup()
 	
 	// only for Leonardo needed
 	// necessario solo per la Leonardo
+	while (!Serial)
+		;
 
 	// initialize SPI
 	// inizializza il modulo SPI
@@ -197,14 +207,10 @@ void loop()
 	// se ci sono dati provenienti dalla rete
 	// li invia alla porta seriale. Questo solo a scopo di debugging
 	int n;
-  char ss;
-	if ((n = client.available()) > 0) {
-    while ( (n = client.available()) > 0)
+	while ( (n = client.available()) > 0)
 	{
 		char c = client.read();
-		ss += c;
-
-    // error
+		Serial.write(c);
 		if(c == -1)
 		{
 			Serial.print("\nn:");
@@ -215,11 +221,6 @@ void loop()
 			Serial.println(client.ref->remoteAvail());
 		}
 	}
-  stringstream sss;
-  sss << "hello,world!!";
-  Serial.println(sss);
-  ss = "";
-  }
 
 	// if ten seconds have passed since your last connection,
 	// then connect again and send data
@@ -228,7 +229,7 @@ void loop()
 	if (millis() - lastConnectionTime > postingInterval)
 	{
 		httpRequest();
-		uint32_t tim = millis() + 5000;
+		uint32_t tim = millis() + 500;
 		while(!client.available() && millis() < tim)
 			;
 	}
