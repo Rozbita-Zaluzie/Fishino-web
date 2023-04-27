@@ -208,7 +208,7 @@ void loop()
 	// se ci sono dati provenienti dalla rete
 	// li invia alla porta seriale. Questo solo a scopo di debugging
 	int n;
-  char buffer[800];
+  char buffer[190];
   int index = 0;
 	while ( (n = client.available()) > 0)
 	{
@@ -216,7 +216,7 @@ void loop()
 		// realtime (char by char) output
     //Serial.write(c);
     // start recording JSON file
-    if(index < 799)
+    if(index < 189)
     {
       buffer[index] = c;
       index++;
@@ -227,8 +227,8 @@ void loop()
 		{
 			Serial.print("\nn:");
 			Serial.println(n);
-			Serial.print("_bufCount:");a
-			Serial.println(client.ref->_bufCount);a
+			Serial.print("_bufCount:");
+			Serial.println(client.ref->_bufCount);
 			Serial.print("RemAvail:");
 			Serial.println(client.ref->remoteAvail());
 		}
